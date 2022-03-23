@@ -1,0 +1,42 @@
+name: Build .deb package
+
+on:
+  push: {}
+    # tags:
+    #   - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: ucode/
+          fetch-depth: 0
+
+      - name: Create archive
+        run: |
+          cd ucode/
+
+          GIT_TAG=$(git tag)
+          tar czf ../ucode_${GIT_TAG#*v}.orig.tar.gz .
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install devscripts build-essential lintian libjson-c-dev
+      
+      - name: Build package
+        run: |
+          ls
+          cd ucode/
+          git tag
+
+          ls
+          debuild -us -uc
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb
+          path: ucode*.deb
