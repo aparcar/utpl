@@ -15,7 +15,7 @@ jobs:
 
       - name: Setup
         run: |
-          brew install json-c libmd
+          brew install json-c libmd libyaml
 
       - name: Build minimal version
         run: |
