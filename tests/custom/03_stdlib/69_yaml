@@ -1,0 +1,327 @@
+The `yaml` module provides functions for parsing and stringifying YAML data.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	// Parse a simple YAML mapping
+	let data = yaml.parse("name: John\nage: 30");
+	printf("%.J\n", data);
+%}
+-- End --
+
+-- Expect stdout --
+{
+	"name": "John",
+	"age": 30
+}
+-- End --
+
+
+Parsing YAML sequences (arrays).
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let list = yaml.parse("- apple\n- banana\n- cherry");
+	printf("%.J\n", list);
+%}
+-- End --
+
+-- Expect stdout --
+[
+	"apple",
+	"banana",
+	"cherry"
+]
+-- End --
+
+
+Parsing nested YAML structures.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let nested = yaml.parse("person:\n  name: Alice\n  hobbies:\n    - reading\n    - coding");
+	printf("%.J\n", nested);
+%}
+-- End --
+
+-- Expect stdout --
+{
+	"person": {
+		"name": "Alice",
+		"hobbies": [
+			"reading",
+			"coding"
+		]
+	}
+}
+-- End --
+
+
+YAML type coercion for booleans, numbers and null.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let types = yaml.parse("bool_true: true\nbool_yes: yes\nbool_on: on\nbool_false: false\nbool_no: no\nbool_off: off\nint: 42\nfloat: 3.14\nnull_value: null\nnull_tilde: ~\nempty:");
+	printf("%.J\n", types);
+%}
+-- End --
+
+-- Expect stdout --
+{
+	"bool_true": true,
+	"bool_yes": true,
+	"bool_on": true,
+	"bool_false": false,
+	"bool_no": false,
+	"bool_off": false,
+	"int": 42,
+	"float": 3.14,
+	"null_value": null,
+	"null_tilde": null,
+	"empty": null
+}
+-- End --
+
+
+Quoted strings remain strings even if they look like other types.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let quoted = yaml.parse('str_true: "true"\nstr_num: "42"\nstr_null: "null"');
+	printf("%.J\n", quoted);
+%}
+-- End --
+
+-- Expect stdout --
+{
+	"str_true": "true",
+	"str_num": "42",
+	"str_null": "null"
+}
+-- End --
+
+
+Special float values (infinity, nan).
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let special = yaml.parse("pos_inf: .inf\nneg_inf: -.inf\nnan: .nan");
+	print(special.pos_inf == (1/0) ? "pos_inf OK" : "pos_inf FAIL", "\n");
+	print(special.neg_inf == (-1/0) ? "neg_inf OK" : "neg_inf FAIL", "\n");
+	print(special.nan != special.nan ? "nan OK" : "nan FAIL", "\n");
+%}
+-- End --
+
+-- Expect stdout --
+pos_inf OK
+neg_inf OK
+nan OK
+-- End --
+
+
+Stringify an object to YAML.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let obj = { name: "Bob", age: 25 };
+	let str = yaml.stringify(obj);
+	print(str);
+%}
+-- End --
+
+-- Expect stdout --
+name: Bob
+age: 25
+-- End --
+
+
+Stringify an array to YAML.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let arr = ["one", "two", "three"];
+	let str = yaml.stringify(arr);
+	print(str);
+%}
+-- End --
+
+-- Expect stdout --
+- one
+- two
+- three
+-- End --
+
+
+Stringify nested structures.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let nested = {
+		user: {
+			name: "Charlie",
+			tags: ["admin", "developer"]
+		}
+	};
+	let str = yaml.stringify(nested);
+	print(str);
+%}
+-- End --
+
+-- Expect stdout --
+user:
+  name: Charlie
+  tags:
+    - admin
+    - developer
+-- End --
+
+
+Stringify scalar values.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	printf("%.J\n", [
+		yaml.stringify(null),
+		yaml.stringify(true),
+		yaml.stringify(false),
+		yaml.stringify(42),
+		yaml.stringify(3.14)
+	]);
+%}
+-- End --
+
+-- Expect stdout --
+[
+	"null\n",
+	"true\n",
+	"false\n",
+	"42\n",
+	"3.14\n"
+]
+-- End --
+
+
+Strings that look like other types are quoted to preserve their type.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let data = {
+		looks_like_bool: "true",
+		looks_like_null: "null",
+		looks_like_num: "123",
+		empty: ""
+	};
+	let str = yaml.stringify(data);
+	print(str);
+%}
+-- End --
+
+-- Expect stdout --
+looks_like_bool: "true"
+looks_like_null: "null"
+looks_like_num: "123"
+empty: ""
+-- End --
+
+
+Round-trip test: parse then stringify should preserve data.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let original = {
+		string: "hello",
+		number: 42,
+		float: 3.14,
+		bool: true,
+		null_val: null,
+		array: [1, 2, 3],
+		nested: { key: "value" }
+	};
+
+	let yamlStr = yaml.stringify(original);
+	let parsed = yaml.parse(yamlStr);
+
+	print(parsed.string == original.string ? "string OK" : "string FAIL", "\n");
+	print(parsed.number == original.number ? "number OK" : "number FAIL", "\n");
+	print(parsed.float == original.float ? "float OK" : "float FAIL", "\n");
+	print(parsed.bool == original.bool ? "bool OK" : "bool FAIL", "\n");
+	print(parsed.null_val == original.null_val ? "null OK" : "null FAIL", "\n");
+	print(length(parsed.array) == 3 ? "array OK" : "array FAIL", "\n");
+	print(parsed.nested.key == "value" ? "nested OK" : "nested FAIL", "\n");
+%}
+-- End --
+
+-- Expect stdout --
+string OK
+number OK
+float OK
+bool OK
+null OK
+array OK
+nested OK
+-- End --
+
+
+Passing a non-string value to parse returns null.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	printf("%.J\n", [
+		yaml.parse(123),
+		yaml.parse(null),
+		yaml.parse(true)
+	]);
+%}
+-- End --
+
+-- Expect stdout --
+[
+	null,
+	null,
+	null
+]
+-- End --
+
+
+Hexadecimal and octal integer notation.
+
+-- Testcase --
+{%
+	let yaml = require('yaml');
+
+	let nums = yaml.parse("hex: 0xFF\noctal: 0o77");
+	printf("%.J\n", nums);
+%}
+-- End --
+
+-- Expect stdout --
+{
+	"hex": 255,
+	"octal": 63
+}
+-- End --
