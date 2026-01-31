@@ -81,3 +81,19 @@ Description: Development files for the ucode VM library
  This package contains the development header to interface with the libucode
  VM runtime, which is required when developing programs or extensions using
  the ucode C API.
+
+Package: ucode-mod-yaml
+Architecture: any
+Multi-Arch: foreign
+Depends: libucode (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Enhances: libucode
+Description: YAML module for the ucode language
+ Ucode is a tiny script language featuring ECMA script syntax, builtin JSON
+ support and templating using Jinja inspired markup. The ucode VM is provided
+ as shared library with a C API allowing embedding into host applications and
+ interchanging data between ucode and C programs. The ucode VM can also be
+ used as stand-alone multi purpose scripting language through the provided
+ ucode cli interpreter.
+ .
+ This package contains the YAML module which provides functions for parsing
+ and serializing YAML data using the libyaml library.

@@ -1,1 +1,10 @@
-usr/lib/*/ucode/*.so
+usr/lib/*/ucode/debug.so
+usr/lib/*/ucode/digest.so
+usr/lib/*/ucode/fs.so
+usr/lib/*/ucode/io.so
+usr/lib/*/ucode/log.so
+usr/lib/*/ucode/math.so
+usr/lib/*/ucode/resolv.so
+usr/lib/*/ucode/socket.so
+usr/lib/*/ucode/struct.so
+usr/lib/*/ucode/zlib.so
