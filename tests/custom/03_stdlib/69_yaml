@@ -188,8 +188,8 @@ Stringify nested structures.
 user:
   name: Charlie
   tags:
-    - admin
-    - developer
+  - admin
+  - developer
 -- End --
 
 

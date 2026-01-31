@@ -100,17 +100,7 @@ parse_yaml_scalar(yaml_event_t *event)
 	    strcasecmp(value, "off") == 0)
 		return ucv_boolean_new(false);
 
-	/* Check for integer (decimal, hex, octal) */
-	intval = strtoll(value, &endptr, 0);
-	if (*endptr == '\0' && endptr != value)
-		return ucv_int64_new(intval);
-
-	/* Check for float */
-	dblval = strtod(value, &endptr);
-	if (*endptr == '\0' && endptr != value)
-		return ucv_double_new(dblval);
-
-	/* Check for special float values */
+	/* Check for special float values (before strtod which may partially parse) */
 	if (strcasecmp(value, ".inf") == 0 || strcasecmp(value, "+.inf") == 0)
 		return ucv_double_new(INFINITY);
 
@@ -119,6 +109,23 @@ parse_yaml_scalar(yaml_event_t *event)
 
 	if (strcasecmp(value, ".nan") == 0)
 		return ucv_double_new(NAN);
+
+	/* Check for YAML 1.1 octal notation (0o prefix) */
+	if (length > 2 && value[0] == '0' && (value[1] == 'o' || value[1] == 'O')) {
+		intval = strtoll(value + 2, &endptr, 8);
+		if (*endptr == '\0' && endptr != value + 2)
+			return ucv_int64_new(intval);
+	}
+
+	/* Check for integer (decimal, hex, C-style octal) */
+	intval = strtoll(value, &endptr, 0);
+	if (*endptr == '\0' && endptr != value)
+		return ucv_int64_new(intval);
+
+	/* Check for float */
+	dblval = strtod(value, &endptr);
+	if (*endptr == '\0' && endptr != value)
+		return ucv_double_new(dblval);
 
 	/* Default: treat as string */
 	return ucv_string_new_length(value, length);
