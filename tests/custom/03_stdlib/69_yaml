@@ -115,11 +115,18 @@ Special float values (infinity, nan).
 -- Testcase --
 {%
 	let yaml = require('yaml');
+	let math = require('math');
 
 	let special = yaml.parse("pos_inf: .inf\nneg_inf: -.inf\nnan: .nan");
-	print(special.pos_inf == (1/0) ? "pos_inf OK" : "pos_inf FAIL", "\n");
-	print(special.neg_inf == (-1/0) ? "neg_inf OK" : "neg_inf FAIL", "\n");
-	print(special.nan != special.nan ? "nan OK" : "nan FAIL", "\n");
+
+	// Check positive infinity: value > 0 and 1/value == 0
+	print((special.pos_inf > 0 && 1/special.pos_inf == 0) ? "pos_inf OK" : "pos_inf FAIL", "\n");
+
+	// Check negative infinity: value < 0 and 1/value == 0
+	print((special.neg_inf < 0 && 1/special.neg_inf == 0) ? "neg_inf OK" : "neg_inf FAIL", "\n");
+
+	// Check NaN: value != value (NaN is not equal to itself)
+	print(math.isnan(special.nan) ? "nan OK" : "nan FAIL", "\n");
 %}
 -- End --
 
