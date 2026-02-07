@@ -1,4 +1,4 @@
-name: Build on macOS
+name: Build and test on macOS
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build and test
     runs-on: macos-latest
 
     steps:
@@ -15,13 +15,15 @@ jobs:
 
       - name: Setup
         run: |
-          brew install json-c libmd
+          brew install json-c libmd libyaml
 
-      - name: Build minimal version
+      - name: Build
         run: |
           mkdir build
           cd build
           cmake \
+            -D CMAKE_PREFIX_PATH="$(brew --prefix)" \
+            -D UNIT_TESTING=ON \
             -D NL80211_SUPPORT=OFF \
             -D RTNL_SUPPORT=OFF \
             -D UBUS_SUPPORT=OFF \
@@ -30,11 +32,16 @@ jobs:
             ..
           make
 
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: minimal-build
+          name: macos-build
           if-no-files-found: ignore
           path: |
             build/
