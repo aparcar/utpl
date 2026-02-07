@@ -101,13 +101,18 @@ parse_yaml_scalar(yaml_event_t *event)
 		return ucv_boolean_new(false);
 
 	/* Check for special float values (before strtod which may partially parse) */
-	if (strcasecmp(value, ".inf") == 0 || strcasecmp(value, "+.inf") == 0)
+	if (strcasecmp(value, ".inf") == 0 ||
+	    strcasecmp(value, "+.inf") == 0 ||
+	    strcasecmp(value, "inf") == 0 ||
+	    strcasecmp(value, "+inf") == 0)
 		return ucv_double_new(INFINITY);
 
-	if (strcasecmp(value, "-.inf") == 0)
+	if (strcasecmp(value, "-.inf") == 0 ||
+	    strcasecmp(value, "-inf") == 0)
 		return ucv_double_new(-INFINITY);
 
-	if (strcasecmp(value, ".nan") == 0)
+	if (strcasecmp(value, ".nan") == 0 ||
+	    strcasecmp(value, "nan") == 0)
 		return ucv_double_new(NAN);
 
 	/* Check for YAML 1.1 octal notation (0o prefix) */
